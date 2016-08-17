@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://code.alibabatech.com/schema/dubbo
+       http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+
+    <dubbo:annotation package="com.iflytek.yousheng"/>
+
+    <!--消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
+    <dubbo:application name="content-svc-consumer"/>
+    <!--redis注册中心 -->
+    <dubbo:registry address="zookeeper://172.31.4.27:12181?backup=172.31.4.27:22181,172.31.4.27:32181" session="10000"
+                    timeout="10000"/>
+    <!--<dubbo:registry address="zookeeper://172.31.4.28:2181" session="10000" timeout="10000" />-->
+
+    <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
+    <!--<dubbo:reference id="contentSvc" interface="com.iflytek.yousheng.content.svc.api.IContentSvc" version="1.0"/>-->
+
+    <dubbo:reference id="synthesisSvc" interface="com.iflytek.yousheng.synthesis.svc.api.ISynthesisSvc" version="1.0"/>
+
+    <bean id="synthesisSvcTest" class="com.iflytek.yousheng.SynthesisTest"/>
+</beans>

@@ -1,0 +1,73 @@
+package com.iflytek.yousheng;
+
+import com.iflytek.yousheng.synthesis.svc.api.ISynthesisSvc;
+import com.iflytek.yousheng.synthesis.svc.api.model.SynthInfo;
+import com.iflytek.yousheng.synthesis.svc.api.model.req.WorksSynthAddReq;
+import com.iflytek.yousheng.synthesis.svc.api.model.req.WorksSynthQryReq;
+import com.iflytek.yousheng.synthesis.svc.api.model.resp.WorksSynthAddResp;
+import com.iflytek.yousheng.synthesis.svc.api.model.resp.WorksSynthQryResp;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by liquan on 16/8/4.
+ */
+public class SynthesisTest {
+    @Resource
+    private ISynthesisSvc synthesisSvc;
+
+    public void addSynthesisTask(){
+        WorksSynthAddReq req = new WorksSynthAddReq();
+        req.setChannelNo(1234);
+        req.setIsSampleWorks(1);
+        req.setWorksType(1);
+        List<SynthInfo> synthInfos = new ArrayList<SynthInfo>();
+
+        SynthInfo synthInfo = new SynthInfo();
+//        synthInfo.setSpeakingText("[dd30000]");
+        synthInfo.setSpeakingText("唯一在该项目上夺取两枚金牌的是中国，夺金者为2000年悉尼奥运冠军蔡亚林和2004年雅典奥运冠军朱启南。重复前面一段内容,曹逸飞和杨浩然目前排名该项目的第一和第二，具有很强的实力。罗马尼亚的摩尔多维努是卫冕冠军，不过与女子10米气步枪一样，该项目上还没有选手能够连续两次夺冠。此前的8枚奥运会金牌，被来自7个国家的8名选手分获，其中包括另外一名参赛的前冠军");
+        synthInfo.setSpeakerNo(17018);
+        synthInfo.setBgmusicNo(1001);
+//        synthInfo.setSpeakingRate(500);
+//        synthInfo.setSpeakingVolumn(500);
+
+        String a = "记者从兰州城关交警大队了解到，据抽血检测显示，";
+        SynthInfo synthInfo2 = new SynthInfo();
+        synthInfo2.setSpeakingText("手上举，摆出“V”字型经典剪刀手的姿势。8日，记者从兰州城关交警大队了解到，据抽血检测显示，该名驾驶员蒋某血中乙醇含量为为245mg/100ml时，确定属醉酒驾驶。");
+        synthInfo2.setSpeakerNo(10055);
+        synthInfo2.setBgmusicNo(100000);
+        synthInfo2.setSpeakingRate(100);
+        synthInfo2.setSpeakingVolumn(500);
+
+        synthInfos.add(synthInfo);
+        //synthInfos.add(synthInfo2);
+        req.setSynthInfos(synthInfos);
+
+        WorksSynthAddResp resp = synthesisSvc.synthesisTempWorks(req);
+        System.out.println(resp.toString());
+
+        WorksSynthQryReq qryReq = new WorksSynthQryReq();
+        qryReq.setChannelNo(1234);
+        qryReq.setTempWorksId(resp.getTempWorksId());
+
+        try {
+            int i = 0;
+            while (true) {
+                WorksSynthQryResp qryResp = synthesisSvc.qrySynthesisTempWorks(qryReq);
+                System.out.println(++i + "->"+ qryResp.toString());
+
+                if (StringUtils.isNotBlank(qryResp.getTempWorksUrl()))
+                    break;
+                else
+                    Thread.sleep(1000);
+            }
+        }catch (Throwable e){
+            e.printStackTrace();
+        }
+
+    }
+}
+

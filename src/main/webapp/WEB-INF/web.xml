@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd "
+         id="WebApp_ID" version="3.0">
+
+    <!-- 项目描述 -->
+    <display-name>iFLYTEK synthesis</display-name>
+
+    <!-- spring配置文件 -->
+    <context-param>
+        <description>spring配置文件路径</description>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:spring.xml, classpath:dubbo-consumer.xml</param-value>
+    </context-param>
+
+    <!-- spring监听器 -->
+    <listener>
+        <description>spring上下文装载监听器：启动Web容器时，自动装配ApplicationContext的配置信息。</description>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!-- spring mvc servlet -->
+    <servlet>
+        <description>spring mvc servlet</description>
+        <servlet-name>synthesis-servlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <description>spring mvc 配置文件</description>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:spring-mvc.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>synthesis-servlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <!-- 错误页面配置 -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/views/common/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>405</error-code>
+        <location>/WEB-INF/views/common/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>406</error-code>
+        <location>/WEB-INF/views/common/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>415</error-code>
+        <location>/WEB-INF/views/common/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/views/common/error.jsp</location>
+    </error-page>
+</web-app>
