@@ -28,8 +28,8 @@ public class SynthesisTest {
 
         SynthInfo synthInfo = new SynthInfo();
 //        synthInfo.setSpeakingText("[dd30000]");
-        synthInfo.setSpeakingText("唯一在该项目上夺取两枚金牌的是中国，夺金者为2000年悉尼奥运冠军蔡亚林和2004年雅典奥运冠军朱启南。重复前面一段内容,曹逸飞和杨浩然目前排名该项目的第一和第二，具有很强的实力。罗马尼亚的摩尔多维努是卫冕冠军，不过与女子10米气步枪一样，该项目上还没有选手能够连续两次夺冠。此前的8枚奥运会金牌，被来自7个国家的8名选手分获，其中包括另外一名参赛的前冠军");
-        synthInfo.setSpeakerNo(17018);
+        synthInfo.setSpeakingText(" If you're creating controls with no the control itself.");
+        synthInfo.setSpeakerNo(30020);
         synthInfo.setBgmusicNo(1001);
 //        synthInfo.setSpeakingRate(500);
 //        synthInfo.setSpeakingVolumn(500);

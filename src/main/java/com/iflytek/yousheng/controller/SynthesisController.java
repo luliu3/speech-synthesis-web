@@ -1,6 +1,5 @@
 package com.iflytek.yousheng.controller;
 
-import com.iflytek.yousheng.model.ProgressResponseEntity;
 import com.iflytek.yousheng.model.SynthesisRequestEntity;
 import com.iflytek.yousheng.synthesis.svc.api.ISynthesisSvc;
 import com.iflytek.yousheng.synthesis.svc.api.model.SynthInfo;
@@ -8,9 +7,6 @@ import com.iflytek.yousheng.synthesis.svc.api.model.req.WorksSynthAddReq;
 import com.iflytek.yousheng.synthesis.svc.api.model.req.WorksSynthQryReq;
 import com.iflytek.yousheng.synthesis.svc.api.model.resp.WorksSynthAddResp;
 import com.iflytek.yousheng.synthesis.svc.api.model.resp.WorksSynthQryResp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -73,13 +69,7 @@ public class SynthesisController {
 
         // 构造回复
         resp = synthesisSvc.synthesisTempWorks(req);
-        String status = "0";
-        if ("000000".equals(resp.getRetCode())) {
-            status = "1";
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("status", status); // "0"出错, "1"正常
-        return new ResponseEntity(headers, HttpStatus.OK);
+        return new ResponseEntity<WorksSynthAddResp>(resp, HttpStatus.OK);
     }
 
     @RequestMapping(value = "qry_progress")
@@ -93,20 +83,7 @@ public class SynthesisController {
         // 构造查询回复
         WorksSynthQryResp qryResp = synthesisSvc.qrySynthesisTempWorks(qryReq);
 
-
-        Integer percentage = qryResp.getSynthPercent();
-        String url = qryResp.getTempWorksUrl();
-        Boolean status = false;
-        String description = "未合成完毕";
-
-        if (url != null) {
-            status = true;
-            description = "合成完毕";
-        }
-
-        ProgressResponseEntity response = new ProgressResponseEntity(status, description, url, percentage);
-
-        return new ResponseEntity<ProgressResponseEntity>(response, HttpStatus.OK);
+        return new ResponseEntity<WorksSynthQryResp>(qryResp, HttpStatus.OK);
     }
 
 }

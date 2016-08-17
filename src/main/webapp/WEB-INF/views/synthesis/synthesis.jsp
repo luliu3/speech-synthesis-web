@@ -17,6 +17,22 @@
     <%@ include file="/WEB-INF/views/common/taglibs.jsp" %>
     <link rel="stylesheet" href="${base_url}/bootstrap-3.3.7-dist/css/bootstrap.css"/>
     <link rel="stylesheet" href="${base_url}/bootstrap-3.3.7-dist/css/bootstrap-theme.css"/>
+    <style type="text/css">
+        .musicControl a {
+            display: inline-block;
+            width: 3em;
+            height: 3em;
+            overflow: hidden;
+            background: url("${base_url}/images/pause.png") no-repeat;
+            background-size: cover;
+        }
+
+        .musicControl a.stop {
+
+            background: url('${base_url}/images/play.png') no-repeat;
+            background-size: cover;
+        }
+    </style>
 </head>
 <body>
 
@@ -26,7 +42,7 @@
     <div class="">
         <form class="form-inline">
             <div class="form-group">
-                <label>主播</label>
+                <label for="speakerNo">主播</label>
                 <select class="form-control" id="speakerNo">
                     <option value="" selected>选择主播</option>
                     <option value="50004">[男] 小洋</option>
@@ -49,7 +65,7 @@
 
             </div>
             <div class="form-group">
-                <label>背景音编号</label>
+                <label for="bgmNo">背景音编号</label>
                 <input type="number" class="form-control" id="bgmNo" placeholder="100000"/>
             </div>
         </form>
@@ -57,35 +73,55 @@
 
         <form>
             <div class="form-group">
-                <label>合成文本</label>
-                <textarea class="form-control" rows="5" id="content"></textarea>
+                <label for="content">合成文本</label>
+                <textarea class="form-control" rows="10" onkeyup="word_count(450, 'content', 'word-count')"
+                          id="content"></textarea>
             </div>
-            <button type="button" class="btn btn-default" id="synthesis-btn">合成</button>
+            <div class="media">
+                <div class="media-body">
+                    <button type="button" class="btn btn-default" id="synthesis-btn">合成</button>
+                </div>
+                <div class="media-right">
+                    <span class="text text-right" id="word-count"></span>
+                </div>
+            </div>
+            <div class="alert alert-danger" style="display: none" id="warning"></div>
         </form>
     </div>
     <br/>
 
     <div class="progress" style="display: none" id="progress-parent">
-        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
-             style="width: 0;" id="progress">
-            <span class="sr-only" id="progress-text">0</span>
+        <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="0"
+             aria-valuemin="0" aria-valuemax="100" style="width: 0;" id="progress">
+            0%
         </div>
     </div>
-    <div class="alert alert-info" style="display: none" id="ret-url"></div>
+
+    <div class="media" style="display: none" id="audition">
+        <div class="media-body">
+            <h4 class="media-heading" id="ret-url"></h4>
+        </div>
+        <div class="media-right" id="audio"></div>
+    </div>
+
 </div>
 
 
 <script src="${base_url}/jquery-1.11.1/jquery-1.11.1.js"></script>
 <script src="${base_url}/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
 <script src="${base_url}/json2/json2.js"></script>
+<script src="${base_url}/my-js/helper.js"></script>
 
 <script type="text/javascript">
-
+    // 点击合成
     $('#synthesis-btn').click(function () {
 
+        var span_warning = $('#warning');
+        span_warning.hide();
+        $('#audition').hide();
         $('#progress-parent').hide();
-        $('#ret-url').hide();
         $(this).text("合成中...");
+        $(this).attr("disabled", "disabled");
 
         // 获取输入内容
         var input_speakerNo = $('#speakerNo');
@@ -99,22 +135,37 @@
         // 检查输入
         if (isBlank(speakerNo)) {
             $(this).text("合成");
-            alert('主播不能为空');
+            span_warning.text('主播不能为空');
+            span_warning.show();
+            $(this).removeAttr("disabled");
             input_speakerNo.focus();
             return;
         }
         if (isBlank(bgmNo)) {
             $(this).text("合成");
-            alert('背景音不能为空');
+            span_warning.text('背景音不能为空');
+            span_warning.show();
+            $(this).removeAttr("disabled");
             input_bgmNo.focus();
             return;
         }
         if (isBlank(content)) {
             $(this).text("合成");
-            alert('文本不能为空');
+            span_warning.text('文本不能为空');
+            span_warning.show();
+            $(this).removeAttr("disabled");
             input_content.focus();
             return;
         }
+        if (content.length > 450) {
+            $(this).text("合成");
+            span_warning.text('合成文本长度不能超过450个字符');
+            span_warning.show();
+            $(this).removeAttr("disabled");
+            input_content.focus();
+            return;
+        }
+
 
         // 为json准备
         var data = {
@@ -127,49 +178,21 @@
         var synthesis_url = '${base_url}/do_synthesis';
 
         // post到合成地址合成
-        $.ajax(synthesis_url, {
-            'headers': {
+        $.ajax({
+            headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            'type': 'POST',
-            'data': JSON.stringify(data),
-            'dataType': 'json',
-            'success': check_progress()
+            url: synthesis_url,
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            success: function (return_data) {
+                check_progress(return_data, '${base_url}');
+            }
         });
     });
 
-    // 隔1s检查一次合成进度
-    function check_progress() {
-        var chk_progress = setInterval(function () {
-            var progress_url = '${base_url}/qry_progress';
-            $.getJSON(progress_url, function (ret_data) {
-                // 显示进度条
-                $('#progress-parent').show();
-                var percent = ret_data.percentage;
-                var div_progress = $('#progress');
-                div_progress.attr("aria-valuenow", percent);
-                div_progress.css("width", percent + '%');
-                $('#progress-text').text(percent + '%');
-                if (true === ret_data.status) {
-                    var div_ret_url = $('#ret-url');
-                    var ret_url = '<a target="_blank" href="' + ret_data.url + '">' + ret_data.url + '</a>';
-                    div_ret_url.html(ret_url);
-                    // 显示成品地址
-                    div_ret_url.show();
-                    clearInterval(chk_progress);
-                    $('#synthesis-btn').text("合成");
-                }
-            });
-        }, 1000);
-    }
-
-    // 检查输入是否为空
-    function isBlank(val) {
-        return val.replace(/(^\s*)|(\s*$)/g, "") == '';
-    }
-
 </script>
-
 </body>
 </html>
